@@ -1,26 +1,56 @@
-import {FormControl, FormHelperText, FormLabel, Input, Option, Select} from "@mui/joy";
+import {forwardRef} from "react";
+import {IMaskInput} from "react-imask";
 import {Controller} from "react-hook-form";
+import {FormControl, FormHelperText, FormLabel, Input} from "@mui/joy";
 
-export const SelectInput = ({placeholder, name, error, label, control, required, fullwidth, options, defaultValue, setValue, width}) => {
+const PhoneMaskCustom = forwardRef(function TextMaskCustom(props, ref) {
+    const {onChange, ...other} = props;
+    return (
+        <IMaskInput
+            {...other}
+            mask="(+55) ** * ****-****"
+            definitions={{
+                "*": /[0-9]/,
+            }}
+            inputRef={ref}
+            onAccept={(value) => onChange({target: {name: props.name, value}})}
+            overwrite
+        />
+    );
+});
+
+export const PhoneInput = (
+    {
+        placeholder,
+        name,
+        error,
+        label,
+        control,
+        required,
+        fullwidth,
+        width
+    }
+) => {
 
     return (
         <Controller
             name={name}
             control={control}
             rules={required ? {required: required} : {}}
-            render={({field, formState}) => (
+            render={({field}) => (
                 <FormControl error={error} sx={fullwidth ? {width: "100%"} : width ? {width: width} : {}}>
                     {label ? <FormLabel>{label}</FormLabel> : <></>}
-                    <Select
+                    <Input
                         {...field}
-                        onChange={(e, newValue) => {
-                            setValue(name, newValue)
-                        }}
-                        defaultValue={defaultValue}
                         placeholder={placeholder ?? ""}
                         size={"md"}
                         variant="soft"
                         fullWidth={!!fullwidth}
+                        slotProps={{
+                            input: {
+                                component: PhoneMaskCustom
+                            }
+                        }}
                         sx={{
                             '--Input-radius': '3px',
                             borderBottom: '2px solid',
@@ -44,20 +74,7 @@ export const SelectInput = ({placeholder, name, error, label, control, required,
                                 transform: 'scaleX(1)',
                             },
                         }}
-                        slotProps={{
-                            listbox: {
-                                sx: {
-                                    zIndex: 99999
-                                }
-                            }
-                        }}
-                    >
-                        {
-                            options.map((item, index) => (
-                                <Option value={item.value} key={index}>{item.label}</Option>
-                            ))
-                        }
-                    </Select>
+                    />
                     {error ? (
                         <FormHelperText>
                             {error}
@@ -66,5 +83,5 @@ export const SelectInput = ({placeholder, name, error, label, control, required,
                 </FormControl>
             )}
         />
-    )
-}
+    );
+};

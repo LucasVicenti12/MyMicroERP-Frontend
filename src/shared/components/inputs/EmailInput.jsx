@@ -1,22 +1,37 @@
-import {FormControl, FormHelperText, FormLabel, Input, Option, Select} from "@mui/joy";
+import {FormControl, FormHelperText, FormLabel, Input} from "@mui/joy";
 import {Controller} from "react-hook-form";
 
-export const SelectInput = ({placeholder, name, error, label, control, required, fullwidth, options, defaultValue, setValue, width}) => {
+export const EmailInput = ({placeholder, name, error, label, control, required, fullwidth, width}) => {
+    const isValidEmail = email =>
+        // eslint-disable-next-line no-useless-escape
+        /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+            email
+        );
+
+    const handleEmailValidation = email => {
+        console.log("ValidateEmail was called with", email);
+
+        const isValid = isValidEmail(email);
+
+        const validityChanged =
+            (errors.email && isValid) || (!errors.email && !isValid);
+        if (validityChanged) {
+            console.log("Fire tracker with", isValid ? "Valid" : "Invalid");
+        }
+
+        return isValid;
+    };
 
     return (
         <Controller
             name={name}
             control={control}
-            rules={required ? {required: required} : {}}
-            render={({field, formState}) => (
+            rules={required ? {required: required, validate: handleEmailValidation} : {}}
+            render={({field}) => (
                 <FormControl error={error} sx={fullwidth ? {width: "100%"} : width ? {width: width} : {}}>
                     {label ? <FormLabel>{label}</FormLabel> : <></>}
-                    <Select
+                    <Input
                         {...field}
-                        onChange={(e, newValue) => {
-                            setValue(name, newValue)
-                        }}
-                        defaultValue={defaultValue}
                         placeholder={placeholder ?? ""}
                         size={"md"}
                         variant="soft"
@@ -44,20 +59,7 @@ export const SelectInput = ({placeholder, name, error, label, control, required,
                                 transform: 'scaleX(1)',
                             },
                         }}
-                        slotProps={{
-                            listbox: {
-                                sx: {
-                                    zIndex: 99999
-                                }
-                            }
-                        }}
-                    >
-                        {
-                            options.map((item, index) => (
-                                <Option value={item.value} key={index}>{item.label}</Option>
-                            ))
-                        }
-                    </Select>
+                    />
                     {error ? (
                         <FormHelperText>
                             {error}

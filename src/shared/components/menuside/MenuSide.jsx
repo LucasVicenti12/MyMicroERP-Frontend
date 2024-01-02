@@ -50,9 +50,9 @@ const closedMixin = (theme) => ({
         duration: theme.transitions.duration.leavingScreen,
     }),
     overflowX: "hidden",
-    width: `calc(${theme.spacing(9)} + 1px)`,
+    width: `calc(${theme.spacing(8)} + 1px)`,
     [theme.breakpoints.up("sm")]: {
-        width: `calc(${theme.spacing(9)} + 1px)`,
+        width: `calc(${theme.spacing(8)} + 1px)`,
     },
 });
 
@@ -148,7 +148,6 @@ export const CustomMenuSide = () => {
                 sx={{
                     display: "flex",
                     flexDirection: "column",
-                    p: 2,
                     borderRadius: "10px",
                     maxHeight: "90vh",
                     overflowY: "scroll",
@@ -210,13 +209,13 @@ const MenuItemOpen = ({item}) => {
                         "::before": item.route === selectedPage ? {
                             content: "''",
                             position: "absolute",
-                            top: "0px",
+                            top: "20%",
                             left: "0px",
                             width: "5px",
-                            height: "100%",
+                            height: "55%",
                             backgroundColor: "#FFFFFF",
                             borderTopRightRadius: "2px",
-                            borderBottomRightRadius: "2px",
+                            borderBottomRightRadius: "2px"
                         } : {}
                     }}
                     onClick={() => {
@@ -282,10 +281,10 @@ const MenuItemClose = ({item}) => {
                         "::before": item.route === selectedPage ? {
                             content: "''",
                             position: "absolute",
-                            top: "0px",
+                            top: "25%",
                             left: "0px",
                             width: "5px",
-                            height: "100%",
+                            height: "50%",
                             backgroundColor: "#FFFFFF",
                             borderTopRightRadius: "2px",
                             borderBottomRightRadius: "2px",

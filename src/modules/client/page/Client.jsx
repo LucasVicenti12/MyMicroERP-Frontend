@@ -10,6 +10,7 @@ import {CustomTableContainer} from "../../../shared/components/tables/CustomTabl
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
 import {ClientModalRegister} from "../components/ClientModalRegister.jsx";
+import {VipTypeList} from "../components/VipTypeList.jsx";
 
 const TABLE_CLIENT_COLUMNS = [
     {
@@ -61,39 +62,59 @@ const ClientPage = () => {
                 <Box sx={{width: "100%"}}>
                     <Typography color={"neutral"} sx={{fontSize: "20pt"}}>Client</Typography>
                 </Box>
-                <Box sx={{width: "100%", mt: "3rem", display: "flex", flexDirection: "column", gap: 1}}>
-                    <Box sx={{display: "flex", flexDirection: "row", width: "100%", justifyContent: "space-between"}}>
-                        <Typography color={"neutral"} sx={{fontSize: "15pt", fontWeight: "bold"}}>All
-                            clients</Typography>
-                        <ClientModalRegister clientUUID={""}/>
-                    </Box>
-                    <CustomTableContainer height={"500px"}>
-                        <CustomTable>
-                            <TableHead>
-                                <CustomRowTable>
+                <Box sx={{gap: 2, display: "flex", flexDirection: "row"}}>
+                    <Box sx={{width: "70%", mt: "3rem", display: "flex", flexDirection: "column", gap: 1}}>
+                        <Box sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            width: "100%",
+                            justifyContent: "space-between"
+                        }}>
+                            <Typography color={"neutral"} sx={{fontSize: "15pt", fontWeight: "bold"}}>All
+                                clients</Typography>
+                            <ClientModalRegister clientCode={0}/>
+                        </Box>
+                        <CustomTableContainer height={"500px"}>
+                            <CustomTable>
+                                <TableHead>
+                                    <CustomRowTable>
+                                        {
+                                            TABLE_CLIENT_COLUMNS.map((item, index) => (
+                                                <CustomTableCell width={item.width} content={item.label} key={index}/>
+                                            ))
+                                        }
+                                    </CustomRowTable>
+                                </TableHead>
+                                <TableBody>
                                     {
-                                        TABLE_CLIENT_COLUMNS.map((item, index) => (
-                                            <CustomTableCell width={item.width} content={item.label} key={index}/>
-                                        ))
+                                        clientList.length > 0 ?
+                                            clientList.map((item, index) => (
+                                                <ClientList client={item} key={index}/>
+                                            ))
+                                            : (
+                                                <CustomRowTable>
+                                                    <CustomTableCell colspan={TABLE_CLIENT_COLUMNS.length}
+                                                                     textAlign={"center"}
+                                                                     content={"There are no registered clients"}/>
+                                                </CustomRowTable>
+                                            )
                                     }
-                                </CustomRowTable>
-                            </TableHead>
-                            <TableBody>
-                                {
-                                    clientList.length > 0 ?
-                                        clientList.map((item, index) => (
-                                            <ClientList client={item} key={index}/>
-                                        ))
-                                        : (
-                                            <CustomRowTable>
-                                                <CustomTableCell colspan={TABLE_CLIENT_COLUMNS.length} textAlign={"center"}
-                                                                 content={"There are no registered clients"}/>
-                                            </CustomRowTable>
-                                        )
-                                }
-                            </TableBody>
-                        </CustomTable>
-                    </CustomTableContainer>
+                                </TableBody>
+                            </CustomTable>
+                        </CustomTableContainer>
+                    </Box>
+                    <Box sx={{width: "30%", mt: "3rem", display: "flex", flexDirection: "column", gap: 1}}>
+                        <Box sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            width: "100%",
+                            justifyContent: "space-between"
+                        }}>
+                            <Typography color={"neutral"} sx={{fontSize: "15pt", fontWeight: "bold"}}>All vip
+                                types</Typography>
+                        </Box>
+                        <VipTypeList/>
+                    </Box>
                 </Box>
             </Box>
         </DefaultPage>
@@ -112,7 +133,7 @@ const ClientList = ({client}) => {
             <CustomTableCell content={client.address}/>
             <CustomTableCell
                 content={
-                    <ClientModalRegister clientUUID={client.uuid}/>
+                    <ClientModalRegister clientCode={client.code}/>
                 }
                 textAlign={"center"}
             />
