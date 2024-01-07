@@ -36,7 +36,14 @@ export const PhoneInput = (
         <Controller
             name={name}
             control={control}
-            rules={required ? {required: required} : {}}
+            rules={required ?
+                {
+                    required: required,
+                    pattern: {}
+                } : {
+                    pattern: {}
+                }
+            }
             render={({field}) => (
                 <FormControl error={error} sx={fullwidth ? {width: "100%"} : width ? {width: width} : {}}>
                     {label ? <FormLabel>{label}</FormLabel> : <></>}

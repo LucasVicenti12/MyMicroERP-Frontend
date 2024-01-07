@@ -7,8 +7,8 @@ import {
     DialogContent,
     DialogTitle,
     Divider,
-    IconButton, Tab,
-    TabList, TabPanel,
+    IconButton,
+    TabPanel,
     Tabs,
     Typography
 } from "@mui/joy";
@@ -16,7 +16,7 @@ import {Tooltip} from "@mui/material";
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
-import {useForm} from "react-hook-form";
+import {useFieldArray, useForm} from "react-hook-form";
 import {TextInput} from "../../../shared/components/inputs/TextInput.jsx";
 import {RadioInput} from "../../../shared/components/inputs/RadioInput.jsx";
 import {CnpjInput} from "../../../shared/components/inputs/CnpjInput.jsx";
@@ -30,12 +30,36 @@ import {CustomTab} from "../../../shared/components/tabs/CustomTab.jsx";
 import {CustomTabList} from "../../../shared/components/tabs/CustomTabList.jsx";
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import ContactPageOutlinedIcon from '@mui/icons-material/ContactPageOutlined';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
 // eslint-disable-next-line no-unused-vars,react/prop-types
 export const ClientModalRegister = ({clientCode}) => {
     const [open, setOpen] = useState(false);
 
-    const {handleSubmit, setValue, control, formState, reset, watch} = useForm();
+    const {
+        handleSubmit,
+        clearErrors,
+        setValue,
+        control,
+        formState,
+        reset,
+        watch
+    } = useForm({
+        defaultValues: {
+            contacts: [
+                {"contactType": 1, "contact": ""}
+            ]
+        }
+    });
+
+    const {
+        fields,
+        append,
+        remove
+    } = useFieldArray({
+        control,
+        name: "contacts"
+    })
 
     const {errors} = formState;
 
@@ -49,8 +73,9 @@ export const ClientModalRegister = ({clientCode}) => {
     }
 
     const handleSubmitForm = (values) => {
-        handleRegisterClient(values)
-        handleCloseModal()
+        console.log(values)
+        // handleRegisterClient(values)
+        // handleCloseModal()
     }
 
     useEffect(() => {
@@ -104,12 +129,21 @@ export const ClientModalRegister = ({clientCode}) => {
                 </DialogTitle>
                 <Divider/>
                 <DialogContent>
-                    <ClientModalTabs control={control} errors={errors} formWatch={watch} setValue={setValue}/>
+                    <ClientModalTabs
+                        control={control}
+                        errors={errors}
+                        formWatch={watch}
+                        setValue={setValue}
+                        clearErrors={clearErrors}
+                        fields={fields}
+                        append={append}
+                        remove={remove}
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Box sx={{display: "flex", flexDirection: "row", width: "100%", gap: 2, p: 2}}>
                         <Button fullWidth={true} onClick={() => handleCloseModal()} color={"danger"}>Close
-                            modal</Button>
+                        </Button>
                         <Button fullWidth={true} type={"submit"}>Confirm</Button>
                     </Box>
                 </DialogActions>
@@ -118,7 +152,7 @@ export const ClientModalRegister = ({clientCode}) => {
     )
 }
 
-const ClientModalTabs = ({control, errors, formWatch, setValue}) => {
+const ClientModalTabs = ({control, errors, formWatch, setValue, clearErrors, append, remove, fields}) => {
     return (
         <Tabs defaultValue={0}>
             <CustomTabList>
@@ -129,7 +163,16 @@ const ClientModalTabs = ({control, errors, formWatch, setValue}) => {
                 <ClientForm control={control} errors={errors} formWatch={formWatch}/>
             </TabPanel>
             <TabPanel value={1}>
-                <ClientContactsForm control={control} errors={errors} formWatch={formWatch} setValue={setValue}/>
+                <ClientContactsForm
+                    control={control}
+                    errors={errors}
+                    formWatch={formWatch}
+                    setValue={setValue}
+                    clearErrors={clearErrors}
+                    fields={fields}
+                    append={append}
+                    remove={remove}
+                />
             </TabPanel>
         </Tabs>
     )
@@ -141,7 +184,10 @@ const ClientForm = ({control, errors, formWatch}) => {
     const useClientProvider = useContext(ClientContext);
     const {handleGetDocumentTypeList} = useClientProvider
 
-    const [documentTypeOptions, setDocumentTypeOptions] = useState([]);
+    const [documentTypeOptions, setDocumentTypeOptions] = useState([
+        {label: "CNPJ", value: 1},
+        {label: "CPF", value: 2}
+    ]);
 
     useEffect(() => {
         handleGetDocumentTypeList().then((response) => {
@@ -155,7 +201,7 @@ const ClientForm = ({control, errors, formWatch}) => {
     }, []);
 
     return (
-        <Box sx={{p: 2}}>
+        <Box sx={{p: 2, minHeight: "350px"}}>
             <Box sx={{display: "flex", flexDirection: "column", width: "100%"}}>
                 <TextInput
                     name={"name"}
@@ -238,52 +284,99 @@ const ClientForm = ({control, errors, formWatch}) => {
     )
 }
 
-const ClientContactsForm = ({control, errors, formWatch, setValue}) => {
-    const contactType = formWatch("contactType") ?? 1
+const ClientContactsForm = ({control, errors, formWatch, setValue, clearErrors, append, remove, fields}) => {
+    return (
+        <Box sx={{
+            p: 2, minHeight: "350px", maxHeight: "350px", overflow: "scroll",
+            "&::-webkit-scrollbar": {
+                width: 5,
+                height: 7,
+                backgroundColor: "rgba(106,165,254,0)",
+            },
+            "&::-webkit-scrollbar-thumb": {
+                backgroundColor: "#1c74ff",
+                borderRadius: 2,
+            },
+        }}>
+            <Box sx={{display: "flex", flexDirection: "column", width: "100%"}}>
+                {fields && fields.map((item, index) => (
+                    <ContactComponent
+                        key={index}
+                        index={index}
+                        control={control}
+                        errors={errors}
+                        formWatch={formWatch}
+                        setValue={setValue}
+                        clearErrors={clearErrors}
+                        remove={remove}
+                    />
+                ))}
+            </Box>
+            <Button
+                size={"sm"}
+                startDecorator={<AddOutlinedIcon/>}
+                onClick={() => append({"contactType": 1, "contact": ""})}
+            >Add contact</Button>
+        </Box>
+    )
+}
+
+const ContactComponent = ({index, control, errors, setValue, formWatch, clearErrors, remove}) => {
+
+    const contactType = formWatch(`contacts[${index}].contactType`) ?? 1
+
+    useEffect(() => {
+        clearErrors()
+        setValue(`contacts[${index}].contactType`, contactType)
+    }, [contactType]);
+
+    const errorContactType = errors?.contacts ? errors?.contacts[index]?.contactType : null
+    const errorContact = errors?.contacts ? errors?.contacts[index]?.contact : null
 
     return (
-        <Box sx={{p: 2, minHeight: "400px"}}>
-            <Box sx={{display: "flex", flexDirection: "column", width: "100%"}}>
-                <Box sx={{display: "flex", flexDirection: "row", width: "100%", gap: 2}}>
-                <SelectInput
-                    name={"contactType"}
-                    label={"Contact type"}
-                    required={"Inform the contact type"}
-                    control={control}
-                    placeholder={"Select the contact type"}
-                    error={errors?.contactType ? errors?.contactType?.message ?? false : false}
-                    options={[
-                        {label: "Phone", value: 1},
-                        {label: "Email", value: 2}
-                    ]}
-                    defaultValue={contactType}
-                    setValue={setValue}
-                    width={"30%"}
-                />
-                {
-                    contactType === 1 ?
-                        <PhoneInput
-                            name={"contact"}
-                            label={"Phone"}
-                            required={"Inform the phone"}
-                            control={control}
-                            placeholder={"Type the phone of client"}
-                            error={errors?.contact ? errors?.contact?.message ?? false : false}
-                            width={"70%"}
-                        />
-                        :
-                        <EmailInput
-                            name={"contact"}
-                            label={"Email"}
-                            required={"Inform the email"}
-                            control={control}
-                            placeholder={"Type the email of client"}
-                            error={errors?.contact ? errors?.contact?.message ?? false : false}
-                            width={"70%"}
-                        />
-                }
-                </Box>
-            </Box>
+        <Box sx={{display: "flex", flexDirection: "row", width: "100%", gap: 2, alignItems: "center"}}>
+            <SelectInput
+                name={`contacts[${index}].contactType`}
+                label={"Contact type"}
+                control={control}
+                placeholder={"Select the contact type"}
+                error={errorContactType ? errorContactType.message ?? false : false}
+                options={[
+                    {label: "Phone", value: 1},
+                    {label: "Email", value: 2}
+                ]}
+                setValue={setValue}
+                width={"30%"}
+            />
+            {
+                contactType === 1 ?
+                    <PhoneInput
+                        name={`contacts[${index}].contact`}
+                        label={"Phone"}
+                        control={control}
+                        placeholder={"Type the phone of client"}
+                        error={errorContact ? errorContact.message ?? false : false}
+                        width={"70%"}
+                    />
+                    :
+                    <EmailInput
+                        name={`contacts[${index}].contact`}
+                        label={"Email"}
+                        control={control}
+                        placeholder={"Type the email of client"}
+                        error={errorContact ? errorContact.message ?? false : false}
+                        width={"70%"}
+                    />
+            }
+            {
+                index !== 0 ? (
+                    <IconButton variant={"solid"} color={"primary"} onClick={() => {
+                        remove(index)
+                    }}>
+                        <DeleteOutlinedIcon/>
+                    </IconButton>
+                ) : <></>
+            }
         </Box>
     )
 }
