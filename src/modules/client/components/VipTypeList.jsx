@@ -9,11 +9,11 @@ import {CustomTableCell} from "../../../shared/components/tables/CustomTableCell
 const TABLE_VIP_TYPE_COLUMNS = [
     {
         label: "Code",
-        width: "5%"
+        width: "15%"
     },
     {
         label: "Description",
-        width: "95%"
+        width: "85%"
     }
 ]
 
@@ -43,9 +43,11 @@ export const VipTypeList = () => {
                             ))
                             : (
                                 <CustomRowTable>
-                                    <CustomTableCell colspan={TABLE_VIP_TYPE_COLUMNS.length}
-                                                     textAlign={"center"}
-                                                     content={"There are no registered vip types"}/>
+                                    <CustomTableCell
+                                        colspan={TABLE_VIP_TYPE_COLUMNS.length}
+                                        textAlign={"center"}
+                                        content={"There are no registered vip types"}
+                                    />
                                 </CustomRowTable>
                             )
                     }
@@ -58,8 +60,8 @@ export const VipTypeList = () => {
 const VipTypeTableList = ({vipType}) => {
     return (
         <CustomRowTable>
-            <CustomTableCell width={TABLE_VIP_TYPE_COLUMNS[0]} content={vipType.code} textAlign={"right"}/>
-            <CustomTableCell width={TABLE_VIP_TYPE_COLUMNS[1]} content={vipType.description}/>
+            <CustomTableCell content={vipType.code} textAlign={"right"}/>
+            <CustomTableCell content={vipType.description}/>
         </CustomRowTable>
     )
 }

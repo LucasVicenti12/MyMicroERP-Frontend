@@ -14,26 +14,6 @@ export const LoginPage = () => {
             <Box sx={{display: "flex", flexDirection: "row", width: "100%", height: "100%"}}>
                 <Box sx={{
                     display: "flex",
-                    width: {
-                        xl: "50%",
-                        lg: "50%",
-                        md: "40%",
-                        sm: "0%",
-                        xs: "0%"
-                    },
-                    height: "100%",
-                    background: `url(${backgroundImage})`,
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
-                    backgroundColor: "#FFFFFF",
-                    borderRadius: "10px"
-                }}
-                     component={Paper}
-                     elevation={3}
-                >
-                </Box>
-                <Box sx={{
-                    display: "flex",
                     flexDirection: "column",
                     width: {
                         xl: "50%",
@@ -66,6 +46,26 @@ export const LoginPage = () => {
                             your personal info</Typography>
                         <LoginForm/>
                     </Paper>
+                </Box>
+                <Box sx={{
+                    display: "flex",
+                    width: {
+                        xl: "50%",
+                        lg: "50%",
+                        md: "40%",
+                        sm: "0%",
+                        xs: "0%"
+                    },
+                    height: "100%",
+                    background: `url(${backgroundImage})`,
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: "10px"
+                }}
+                     component={Paper}
+                     elevation={3}
+                >
                 </Box>
             </Box>
         </DefaultPage>

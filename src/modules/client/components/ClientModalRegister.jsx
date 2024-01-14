@@ -31,6 +31,19 @@ import {CustomTabList} from "../../../shared/components/tabs/CustomTabList.jsx";
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import ContactPageOutlinedIcon from '@mui/icons-material/ContactPageOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import Swal from "sweetalert2";
+
+const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+    }
+});
 
 // eslint-disable-next-line no-unused-vars,react/prop-types
 export const ClientModalRegister = ({clientCode}) => {
@@ -65,7 +78,7 @@ export const ClientModalRegister = ({clientCode}) => {
 
     const useClientProvider = useContext(ClientContext)
 
-    const {handleRegisterClient, handleGetClientByCode} = useClientProvider
+    const {handleRegisterClient, handleGetClientByCode, handleUpdateProvider} = useClientProvider
 
     const handleCloseModal = () => {
         setOpen(false)
@@ -73,9 +86,21 @@ export const ClientModalRegister = ({clientCode}) => {
     }
 
     const handleSubmitForm = (values) => {
-        console.log(values)
-        // handleRegisterClient(values)
-        // handleCloseModal()
+        handleRegisterClient(values).then((response) => {
+            if (response.error === null) {
+                handleUpdateProvider()
+                handleCloseModal()
+                return Toast.fire({
+                    icon: "success",
+                    title: "Successfully"
+                })
+            } else {
+                return Toast.fire({
+                    icon: "error",
+                    title: response.error
+                })
+            }
+        })
     }
 
     useEffect(() => {
@@ -86,11 +111,21 @@ export const ClientModalRegister = ({clientCode}) => {
                     setValue("uuid", response.client.uuid)
                     setValue("name", response.client.name)
                     setValue("fantasyName", response.client.fantasyName)
-                    setValue("documentType", response.client.documentType)
+                    setValue("documentType", response.client.documentType.code)
                     setValue("document", response.client.document)
-                    setValue("vipCode", response.client.vipCode)
+                    setValue("vipCode", response.client.vipType.code)
                     setValue("address", response.client.address)
                     setValue("zipCode", response.client.zipCode)
+                    if (response.client.contacts.length > 0) {
+                        response.client.contacts.map((contact, index) => {
+                            if (index !== 0) {
+                                append({"contactType": contact.contactType.code, "contact": contact.contact})
+                            } else {
+                                setValue("contacts[0].contactType", contact.contactType.code);
+                                setValue("contacts[0].contact", contact.contact);
+                            }
+                        })
+                    }
                 }
             })
         }
@@ -121,7 +156,7 @@ export const ClientModalRegister = ({clientCode}) => {
                         width: "100%"
                     }}
                     >
-                        <Typography>{clientCode !== 0 ? "Edit client" : "Register client"}</Typography>
+                        <Typography>{clientCode !== 0 ? "Edit client - " + clientCode : "Register client"}</Typography>
                         <IconButton onClick={() => handleCloseModal()}>
                             <CloseOutlinedIcon/>
                         </IconButton>
@@ -160,7 +195,7 @@ const ClientModalTabs = ({control, errors, formWatch, setValue, clearErrors, app
                 <CustomTab label={"Contacts"} icon={<ContactPageOutlinedIcon fontSize={"15pt"}/>}/>
             </CustomTabList>
             <TabPanel value={0}>
-                <ClientForm control={control} errors={errors} formWatch={formWatch}/>
+                <ClientForm control={control} errors={errors} formWatch={formWatch} setValue={setValue}/>
             </TabPanel>
             <TabPanel value={1}>
                 <ClientContactsForm
@@ -178,21 +213,26 @@ const ClientModalTabs = ({control, errors, formWatch, setValue, clearErrors, app
     )
 }
 
-const ClientForm = ({control, errors, formWatch}) => {
-    const documentType = formWatch("documentType") ?? 1
+const ClientForm = ({control, errors, formWatch, setValue}) => {
+    const documentType = parseInt(formWatch("documentType") ?? 1)
 
     const useClientProvider = useContext(ClientContext);
-    const {handleGetDocumentTypeList} = useClientProvider
+    const {handleGetDocumentTypeList, vipTypeList} = useClientProvider
 
     const [documentTypeOptions, setDocumentTypeOptions] = useState([
         {label: "CNPJ", value: 1},
         {label: "CPF", value: 2}
     ]);
 
+    const vipTypeOptions = vipTypeList.map((vipType) => ({
+        label: vipType.description,
+        value: vipType.code
+    }))
+
     useEffect(() => {
         handleGetDocumentTypeList().then((response) => {
             if (response.error === null) {
-                setDocumentTypeOptions(response.documentTypes.map((value, _) => ({
+                setDocumentTypeOptions(response.documentTypes.map((value) => ({
                     label: value.description,
                     value: value.code
                 })));
@@ -201,7 +241,7 @@ const ClientForm = ({control, errors, formWatch}) => {
     }, []);
 
     return (
-        <Box sx={{p: 2, minHeight: "350px"}}>
+        <Box sx={{p: 2, minHeight: "370px", maxHeight: "370px"}}>
             <Box sx={{display: "flex", flexDirection: "column", width: "100%"}}>
                 <TextInput
                     name={"name"}
@@ -249,14 +289,15 @@ const ClientForm = ({control, errors, formWatch}) => {
                             fullwidth={true}
                         />
                     }
-                    <TextInput
+                    <SelectInput
                         name={"vipCode"}
-                        label={"Vip code"}
-                        required={"Inform the vip code"}
+                        label={"Vip type"}
                         control={control}
-                        placeholder={"Type the vip code of client"}
-                        error={errors?.vipCode ? errors?.vipCode?.message ?? false : false}
-                        fullwidth={true}
+                        placeholder={"Select the vip type"}
+                        error={errors?.vipCode ? errors?.vipCode.message ?? false : false}
+                        options={vipTypeOptions}
+                        setValue={setValue}
+                        width={"30%"}
                     />
                 </Box>
                 <Box sx={{display: "flex", flexDirection: "row", width: "100%", gap: 2}}>
@@ -287,7 +328,7 @@ const ClientForm = ({control, errors, formWatch}) => {
 const ClientContactsForm = ({control, errors, formWatch, setValue, clearErrors, append, remove, fields}) => {
     return (
         <Box sx={{
-            p: 2, minHeight: "350px", maxHeight: "350px", overflow: "scroll",
+            p: 2, minHeight: "370px", maxHeight: "370px", overflow: "scroll",
             "&::-webkit-scrollbar": {
                 width: 5,
                 height: 7,

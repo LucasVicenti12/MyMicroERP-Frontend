@@ -2,9 +2,14 @@ import {clientRepository} from "../repository/ClientRepository.js";
 import {ClientResponse} from "./response/ClientResponse.js";
 
 class ClientUsecase {
-    async getClientList() {
+    /**
+     * @param {number} page
+     * @param {number} numberPerPages
+     * @returns {Promise<ClientResponse|ClientArrayResponse>}
+     */
+    async getClientList(page, numberPerPages) {
         try {
-            return clientRepository.getClientList();
+            return clientRepository.getClientList(page, numberPerPages);
         } catch (e) {
             return new ClientResponse(
                 [],
@@ -27,6 +32,10 @@ class ClientUsecase {
 
     async getAllDocumentType() {
         return clientRepository.getAllDocumentType();
+    }
+
+    async registerVipType(vipType) {
+        return clientRepository.registerVipType(vipType)
     }
 }
 

@@ -1,14 +1,14 @@
 import {FormControl, FormHelperText, FormLabel, Input, Option, Select} from "@mui/joy";
 import {Controller} from "react-hook-form";
 
-export const SelectInput = ({placeholder, name, error, label, control, required, fullwidth, options, defaultValue, setValue, width}) => {
+export const SelectInput = ({placeholder, name, error, label, control, required, fullwidth, options, setValue, width}) => {
 
     return (
         <Controller
             name={name}
             control={control}
             rules={required ? {required: required} : {}}
-            render={({field, formState}) => (
+            render={({field}) => (
                 <FormControl error={error} sx={fullwidth ? {width: "100%"} : width ? {width: width} : {}}>
                     {label ? <FormLabel>{label}</FormLabel> : <></>}
                     <Select
@@ -16,7 +16,6 @@ export const SelectInput = ({placeholder, name, error, label, control, required,
                         onChange={(e, newValue) => {
                             setValue(name, newValue)
                         }}
-                        defaultValue={defaultValue}
                         placeholder={placeholder ?? ""}
                         size={"md"}
                         variant="soft"

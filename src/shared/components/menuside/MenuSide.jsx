@@ -16,6 +16,8 @@ import ConnectWithoutContactOutlinedIcon from '@mui/icons-material/ConnectWithou
 import {Button, IconButton} from "@mui/joy";
 import {AuthContext} from "../../../core/auth/implementation/AuthProvider.jsx";
 import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
+import GradingOutlinedIcon from '@mui/icons-material/GradingOutlined';
+
 const drawerWidth = 225;
 
 const MenuModules = [
@@ -29,6 +31,13 @@ const MenuModules = [
                 icon: (color) => (<LocalMallOutlinedIcon fontSize="small" sx={{color: color}}/>),
                 route: "/web/client",
                 label: "Client",
+                routes: [],
+                expanded: false,
+            },
+            {
+                icon: (color) => (<GradingOutlinedIcon fontSize="small" sx={{color: color}}/>),
+                route: "/web/order",
+                label: "Purchase order",
                 routes: [],
                 expanded: false,
             },
@@ -160,6 +169,7 @@ export const CustomMenuSide = () => {
                         borderRadius: 2,
                     },
                     overflowX: "hidden",
+                    pl: "5px"
                 }}
             >
                 {
@@ -171,14 +181,20 @@ export const CustomMenuSide = () => {
                     )
                 }
             </List>
-            <IconButton onClick={() => handleLogout()}
-                sx={{":hover": {
-                    backgroundColor: "rgba(0,0,0,0.06)",
-                    transition: "background-color 100ms linear"
-                }}}
-            >
-                <ExitToAppOutlinedIcon sx={{color: "#FFFFFF"}} />
-            </IconButton>
+            <Box sx={{display: "flex", flexDirection: "row", width: "100%", justifyContent: "center"}}>
+                <Tooltip title={"Logout"}>
+                    <IconButton onClick={() => handleLogout()}
+                                sx={{
+                                    ":hover": {
+                                        backgroundColor: "rgba(0,0,0,0.06)",
+                                        transition: "background-color 100ms linear"
+                                    }
+                                }}
+                    >
+                        <ExitToAppOutlinedIcon sx={{color: "#FFFFFF"}}/>
+                    </IconButton>
+                </Tooltip>
+            </Box>
         </Drawer>
     );
 }

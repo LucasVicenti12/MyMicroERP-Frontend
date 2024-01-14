@@ -4,13 +4,18 @@ import {VipTypeArrayResponse} from "../usecase/response/VipTypeResponse.js";
 import {DocumentTypeArrayResponse} from "../usecase/response/DocumentTypeResponse.js";
 
 class ClientRepository {
-    async getClientList() {
-        const response = await http.get("/client");
+    /**
+     * @param {number} page
+     * @param {number} numberPerPages
+     * @returns {Promise<ClientArrayResponse>}
+     */
+    async getClientList(page, numberPerPages) {
+        const response = await http.get(`/client?page=${page}&numberRecordsPerPage=${numberPerPages}`);
         if (response.status === 200) {
             if (response.data.error !== null) {
                 return new ClientArrayResponse([], response.data.error.message);
             } else {
-                return new ClientArrayResponse(response.data.clients, null);
+                return new ClientArrayResponse(response.data, null);
             }
         } else {
             return new ClientArrayResponse([], "it was not possible to consult clients");
@@ -18,30 +23,55 @@ class ClientRepository {
     }
 
     async saveClient(client) {
-        var data = {}
+        if (client.contacts.length > 0) {
+            if (client.contacts[0].contactType === 1 && client.contacts[0].contact === "") {
+                client.contacts = [];
+            }
+        }
+        if (client.contacts.length > 0) {
+            let tempArray = [];
+            client.contacts.map((contact) => {
+                tempArray.push({
+                    contactType: {
+                        code: contact.contactType,
+                    },
+                    contact: contact.contact
+                })
+            });
+            client.contacts = tempArray;
+        }
+        let data = {};
         if (client.uuid) {
             data = {
                 uuid: client.uuid,
                 code: client.code,
                 name: client.name,
                 fantasyName: client.fantasyName,
-                documentType: client.documentType,
+                documentType: {
+                    code: client.documentType
+                },
                 document: client.document,
                 address: client.address,
                 zipCode: client.zipCode,
-                vipCode: client.vipCode,
-                contacts: []
+                vipType: {
+                    code: client.vipCode
+                },
+                contacts: client.contacts
             }
         } else {
             data = {
                 name: client.name,
                 fantasyName: client.fantasyName,
-                documentType: client.documentType,
+                documentType: {
+                    code: client.documentType
+                },
                 document: client.document,
                 address: client.address,
                 zipCode: client.zipCode,
-                vipCode: client.vipCode,
-                contacts: []
+                vipType: {
+                    code: client.vipCode
+                },
+                contacts: client.contacts
             }
         }
         const response = await http.post("/client", data)
@@ -93,6 +123,12 @@ class ClientRepository {
         } else {
             return new DocumentTypeArrayResponse([], "it was not possible to consult document types");
         }
+    }
+
+    async registerVipType(vipType) {
+        return await http.post("/client/vipType", {
+            description: vipType
+        });
     }
 }
 
